@@ -1,3 +1,8 @@
 # Python package requirements
 bertopic
 # if you get an error during bertopic pip insttall try: conda install -c conda-forge hdbscan
+transformers
+tqdm
+numpy
+pandas
+torch
