@@ -18,7 +18,7 @@ def predict_sentiment(sent_pipe, sentence):
 
 # distilbert-base-uncased-finetuned-sst-2-english classifies into "POSITIVE" or "NEGATIVE" + score how certain
 # bert-base-multilingual-uncased-sentiment classifies into "1 star", "2 stars", ... "5 stars" + score how certain
-AVAILABLE_MODELS = ['distilbert-base-uncased-finetuned-sst-2-english', 'bert-base-multilingual-uncased-sentiment']
+AVAILABLE_MODELS = ['distilbert-base-uncased-finetuned-sst-2-english', 'nlptown/bert-base-multilingual-uncased-sentiment']
 
 
 def classify_sentiment(data: pd.DataFrame, classifier: str):
@@ -40,6 +40,11 @@ def classify_sentiment(data: pd.DataFrame, classifier: str):
     # Add the predictions to the dataframe
     data['sentiment_label'] = sentiment_labels
     data['sentiment_score'] = sentiment_scores
+
+    # Print number of reviews per label
+    print("Results of classification:")
+    for label in data['sentiment_label'].unique():
+        print(f"\t{label}: {len(data[data['sentiment_label'] == label])} reviews")
 
     # Print most extreme reviews
     print("Most positive review:", data.loc[data['sentiment_score'].idxmax()]['review_content'])
