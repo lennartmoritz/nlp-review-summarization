@@ -1,1 +1,6 @@
-# This is our gitignore file
+.pyenv
+venv
+__pycache__
+*.py[cod]
+
+data.csv
