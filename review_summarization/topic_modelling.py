@@ -1,15 +1,17 @@
 import numpy as np
+import torch
 from bertopic import BERTopic
 import pandas as pd
 
 
 def model_topics(data: pd.DataFrame, print_topics: bool = True):
     # convert pd.nan entries from float to string to work with model
-    docs = list(data.loc[:, "review_content"].astype('str').values)
+    docs = list(data["review_content"].astype('str').values)
+    embeddings = torch.stack(data["embedding"].values.tolist()).numpy()
 
     # Execute the topic modeling
     topic_model = BERTopic(language="english")
-    topics, probs = topic_model.fit_transform(docs)
+    topics, probs = topic_model.fit_transform(docs, embeddings)
     topics = np.array(topics)
 
     # Print topic results. The -1 topic refers to all outlier documents and is typically ignored

@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import torch
 from scipy.spatial import KDTree
 from sentence_transformers import CrossEncoder, SentenceTransformer
 import pandas as pd
@@ -33,7 +34,7 @@ class BiEncoderSimilarity:
     def set_data(self, data: pd.DataFrame):
         self.data = data
         # Encode given movie reviews
-        self.embeddings = self.model.encode(data["review_content"].values.tolist(), convert_to_tensor=True)
+        self.embeddings = torch.stack(data['embedding'].values.tolist())
 
         # A K-D tree can be used for efficient nearest neighbor queries
         # If we normalize the embeddings, k-d trees are equivalent to cosine similarity
