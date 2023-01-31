@@ -37,11 +37,12 @@ def print_dataset_information(data):
     """
     Prints information about the dataset.
     """
-    print(f"Dataset has {len(data)} rows.")
     if len(data['movie_title'].unique()) == 1:
-        print(f"Aggregating reviews for movie {data.iloc[0]['movie_title']}.")
+        print(f" === {data.iloc[0]['movie_title']} ===")
     else:
         print(f"Dataset has {len(data['movie_title'].unique())} unique movie titles.")
+
+    print(f"Aggregating {len(data)} reviews.")
 
     data['review_length'] = data['review_content'].str.count(' ') + 1
     print(f"Average review length: {data['review_length'].mean():.2f} words.")

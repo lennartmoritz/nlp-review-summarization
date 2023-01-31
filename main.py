@@ -32,10 +32,11 @@ def aggregate_reviews(data: pd.DataFrame):
 if __name__ == '__main__':
     # TODO: Selection of data (maybe subsets of data as grouped by "dataset_id"- or based on word-count)
     input_parser = argparse.ArgumentParser()
-    input_parser.add_argument('-s', '--sentiment', default=AVAILABLE_MODELS[0], choices=AVAILABLE_MODELS)
+    input_parser.add_argument('--sentiment', default=AVAILABLE_MODELS[0], choices=AVAILABLE_MODELS)
     group = input_parser.add_mutually_exclusive_group(required=True)
     group.add_argument('-r', '--random', action='store_true', help='Aggregate review for a random movie')
     group.add_argument('-a', '--all', action='store_true', help='Aggregate review for all movies')
+    group.add_argument('-s', '--search', help='Search for a specific movie')
 
     args = input_parser.parse_args()
 
@@ -45,10 +46,18 @@ if __name__ == '__main__':
     movie_title_counts = data.movie_title.value_counts()
     movie_titles = movie_title_counts[movie_title_counts > 50].index.values
 
+    movies = []
     if args.random:
         movies = [random.choice(movie_titles)]
     elif args.all:
         movies = movie_titles
+    elif args.search:
+        if args.search in movie_titles:
+            movies = args.search
+        else:
+            movies = list(filter(lambda title: title.startswith(args.search), movie_titles))
+        if not movies:
+            movies = list(filter(lambda title: args.search in title, movie_titles))
 
     for movie in movies:
         movie_reviews = data[data.movie_title == movie]
