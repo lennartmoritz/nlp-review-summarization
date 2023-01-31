@@ -34,6 +34,7 @@ class BiEncoderSimilarity:
         self.data = data
         # Encode given movie reviews
         self.embeddings = self.model.encode(data["review_content"].values.tolist(), convert_to_tensor=True)
+        self.embeddings = self.embeddings.cpu()
 
         # A K-D tree can be used for efficient nearest neighbor queries
         # If we normalize the embeddings, k-d trees are equivalent to cosine similarity
