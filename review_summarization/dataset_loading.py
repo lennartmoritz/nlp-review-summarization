@@ -6,7 +6,10 @@ DATASET_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__fi
 
 
 def load_dataset():
-    data = pd.read_csv(DATASET_PATH, encoding='unicode_escape')
+    data = pd.read_csv(DATASET_PATH, encoding='unicode_escape', dtype={
+        "review_content": str, "review_sentiment": str, "dataset_id": str, "review_id": str, "review_score": str,
+        "author_id": str, "movie_title": str
+    })
     data.dropna(subset=['review_content'], inplace=True)
     return data
 
@@ -35,9 +38,11 @@ def print_dataset_information(data):
     Prints information about the dataset.
     """
     print(f"Dataset has {len(data)} rows.")
-    print(f"Dataset has {len(data['movie_title'].unique())} unique movie titles.")
-    print(f"Dataset has {len(data['review_content'].unique())} unique reviews.")
+    if len(data['movie_title'].unique()) == 1:
+        print(f"Aggregating reviews for movie {data.iloc[0]['movie_title']}.")
+    else:
+        print(f"Dataset has {len(data['movie_title'].unique())} unique movie titles.")
 
     data['review_length'] = data['review_content'].str.count(' ') + 1
-    print(f"Average review length: {data['review_length'].mean()} words.")
+    print(f"Average review length: {data['review_length'].mean():.2f} words.")
     print()

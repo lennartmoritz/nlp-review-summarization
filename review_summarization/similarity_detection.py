@@ -23,35 +23,50 @@ def detect_similarity_crossencoder(data: pd.DataFrame):
     print(f"Most similar reviews: {data.iloc[max_similarity[1][0]]['review_content']} and {data.iloc[max_similarity[1][1]]['review_content']}")
 
 
-def detect_similarity_bi_encoder(data: pd.DataFrame):
-    model = SentenceTransformer('stsb-roberta-large')
+class BiEncoderSimilarity:
+    def __init__(self):
+        self.model = SentenceTransformer('stsb-roberta-large')
+        self.data = None
+        self.embeddings = None
+        self.tree = None
 
-    # Encode all movie reviews
-    embeddings = model.encode(data["review_content"].values.tolist(), convert_to_tensor=True)
+    def set_data(self, data: pd.DataFrame):
+        self.data = data
+        # Encode given movie reviews
+        self.embeddings = self.model.encode(data["review_content"].values.tolist(), convert_to_tensor=True)
 
-    # A K-D tree can be used for efficient nearest neighbor queries
-    # If we normalize the embeddings, k-d trees are equivalent to cosine similarity
-    embeddings = embeddings / embeddings.norm(dim=1, keepdim=True)
+        # A K-D tree can be used for efficient nearest neighbor queries
+        # If we normalize the embeddings, k-d trees are equivalent to cosine similarity
+        self.embeddings = self.embeddings / self.embeddings.norm(dim=1, keepdim=True)
 
-    # find two most similar reviews
-    tree = KDTree(embeddings)
-    dist, ind = tree.query(embeddings, k=2)
+        self.tree = KDTree(self.embeddings)
 
-    # find most similar review to each review
-    most_similar = []
-    for i, review in enumerate(data["review_content"]):
-        most_similar.append(data.iloc[ind[i][1]]["review_content"])
-    data["most_similar_review"] = most_similar
+    def get_average_review(self):
+        """Find the closest review to the average review"""
+        assert self.data is not None, "Call set_data() before getting reviews"
 
-    print("Some examples for similar reviews:")
-    for i in range(5):
-        print(f"Review {i}: {data.iloc[i]['review_content']}")
-        print(f"Most similar review: {data.iloc[i]['most_similar_review']}")
-        print()
+        # Calculate average embedding
+        avg_embedding = self.embeddings.mean(dim=0)
+        # Query tree
+        _, closest_to_avg_idx = self.tree.query(avg_embedding, k=1)
+        closest_to_avg = self.data.iloc[closest_to_avg_idx]["review_content"]
+        return closest_to_avg
 
-    # find the closest review to average review
-    avg_embedding = embeddings.mean(dim=0)
-    _, closest_to_avg_idx = tree.query(avg_embedding, k=1)
-    closest_to_avg = data.iloc[closest_to_avg_idx]["review_content"]
-    print(f"Closest review to average review: {closest_to_avg}")
-    print()
+    def get_closest_review_to_each(self):
+        """Find the most similar review to each of the reviews"""
+        assert self.data is not None, "Call set_data() before getting reviews"
+
+        # find two most similar reviews (first is always review itself)
+        dist, ind = self.tree.query(self.embeddings, k=2)
+
+        # find most similar review to each review
+        most_similar = []
+        for i, review in enumerate(self.data["review_content"]):
+            most_similar.append(self.data.iloc[ind[i][1]]["review_content"])
+        self.data["most_similar_review"] = most_similar
+
+        print("Some examples for similar reviews:")
+        for i in range(5):
+            print(f"Review {i}: {self.data.iloc[i]['review_content']}")
+            print(f"Most similar review: {self.data.iloc[i]['most_similar_review']}")
+            print()

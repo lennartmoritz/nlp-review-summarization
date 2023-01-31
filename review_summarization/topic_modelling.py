@@ -2,10 +2,7 @@ from bertopic import BERTopic
 import pandas as pd
 
 
-def model_topics(data: pd.DataFrame):
-    titles = data["movie_title"].unique()
-    print(f"Running topic modelling on {len(data)} reviews of {len(titles)} movies.")
-
+def model_topics(data: pd.DataFrame, print_topics: bool = True):
     # convert pd.nan entries from float to string to work with model
     docs = list(data.loc[:, "review_content"].astype('str').values)
 
@@ -16,12 +13,15 @@ def model_topics(data: pd.DataFrame):
     # Print topic results. The -1 topic refers to all outlier documents and is typically ignored
     topic_info = topic_model.get_topic_info()
 
-    print(f"The dataset was clustered into {len(topic_info)} topics (one of which is for outliers).")
+    print(f"The reviews were clustered into {len(topic_info) - 1} topics.")
 
-    # Print some representative reviews for each topic
-    for topic, representative_reviews in topic_model.get_representative_docs().items():
-        print(f"Topic {topic}:")
-        for review in representative_reviews:
-            print(f"\t{review}")
+    if print_topics:
+        # Print some representative reviews for each topic
+        for topic, representative_reviews in topic_model.get_representative_docs().items():
+            print(f"Topic {topic}:")
+            for review in representative_reviews:
+                print(f"\t{review}")
+            print()
         print()
-    print()
+
+    return pd.DataFrame({"review_content": docs, "topic": topics})

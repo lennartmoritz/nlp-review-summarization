@@ -43,8 +43,12 @@ def classify_sentiment(data: pd.DataFrame, classifier: str):
 
     # Print number of reviews per label
     print("Results of classification:")
-    for label in data['sentiment_label'].unique():
+    label_classes = data['sentiment_label'].unique()
+    for label in label_classes:
         print(f"\t{label}: {len(data[data['sentiment_label'] == label])} reviews")
+
+    if len(label_classes) == 2:
+        print(f"Review score: {round(len(data[data['sentiment_label'] == 'POSITIVE']) / len(data) * 100)}% positive")
 
     # Print most extreme reviews
     print("Most positive review:", data.loc[data['sentiment_score'].idxmax()]['review_content'])
