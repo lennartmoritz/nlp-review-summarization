@@ -9,10 +9,12 @@ from transformers.pipelines.text_classification import TextClassificationPipelin
 # bert-base-multilingual-uncased-sentiment classifies into "1 star", "2 stars", ... "5 stars" + score how certain
 AVAILABLE_MODELS = ['distilbert-base-uncased-finetuned-sst-2-english', 'nlptown/bert-base-multilingual-uncased-sentiment']
 
+PRETRAINED_MODEL_PATH = './results/checkpoint-42000'
+
 
 class SentimentClassifier():
     def __init__(self):
-        pretrained_model = DistilBertForSequenceClassification.from_pretrained('./results/checkpoint-42000')
+        pretrained_model = DistilBertForSequenceClassification.from_pretrained(PRETRAINED_MODEL_PATH)
         self.pre_classifier = pretrained_model.pre_classifier
         self.classifier = pretrained_model.classifier
         self.id2label = pretrained_model.config.id2label

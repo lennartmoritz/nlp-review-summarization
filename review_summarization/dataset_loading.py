@@ -3,7 +3,7 @@ import os
 import pandas as pd
 
 DATASET_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'data.csv')
-NORMALISED_DATASET_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'data_normalised.csv')
+NORMALISED_DATASET_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'data-sentiment-normalised.csv')
 
 
 def load_dataset():
