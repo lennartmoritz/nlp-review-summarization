@@ -5,7 +5,6 @@ from datasets import load_dataset
 
 
 def train_model():
-    device = "cuda:0" if torch.cuda.is_available() else "cpu"
     config = DistilBertConfig.from_pretrained('distilbert-base-uncased-finetuned-sst-2-english')
     model = DistilBertForSequenceClassification(config)
     model.distilbert.from_pretrained('distilbert-base-uncased')
@@ -24,19 +23,20 @@ def train_model():
 
     dataset = load_dataset('sst2')
     tokenizer = DistilBertTokenizer.from_pretrained('distilbert-base-uncased')
-    tokenized_dataset = dataset.map(lambda d: tokenizer(d['sentence']).to(device), batched=True)
+    tokenized_dataset = dataset.map(lambda d: tokenizer(d['sentence']), batched=True)
     data_collator = DataCollatorWithPadding(tokenizer=tokenizer)
 
     trainer = Trainer(
-        model=model.to(device),
+        model=model,
         args=training_args,
         train_dataset=tokenized_dataset['train'],
-        eval_dataset=tokenized_dataset['test'],
+        eval_dataset=tokenized_dataset['validation'],
         data_collator=data_collator,
     )
 
     trainer.train()
-    trainer.evaluate()
+    eval_results = trainer.evaluate()
+    print(eval_results)
 
 
 if __name__ == '__main__':
