@@ -9,7 +9,7 @@ from transformers.pipelines.text_classification import TextClassificationPipelin
 # bert-base-multilingual-uncased-sentiment classifies into "1 star", "2 stars", ... "5 stars" + score how certain
 AVAILABLE_MODELS = ['distilbert-base-uncased-finetuned-sst-2-english', 'nlptown/bert-base-multilingual-uncased-sentiment']
 
-PRETRAINED_MODEL_PATH = './results/checkpoint-42000'
+PRETRAINED_MODEL_PATH = './model/checkpoint-42000'
 
 
 class SentimentClassifier():

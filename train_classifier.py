@@ -19,7 +19,7 @@ def train_model():
         param.requires_grad = False
 
     training_args = TrainingArguments(
-        output_dir='./results',
+        output_dir='./model',
         num_train_epochs=3,
         per_device_train_batch_size=16,
         per_device_eval_batch_size=64,
