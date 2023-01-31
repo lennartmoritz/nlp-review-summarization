@@ -4,14 +4,19 @@ from bertopic import BERTopic
 import pandas as pd
 
 
-def model_topics(data: pd.DataFrame, print_topics: bool = True):
+def model_topics(data: pd.DataFrame, common_embedding: bool = False, print_topics: bool = True):
     # convert pd.nan entries from float to string to work with model
     docs = list(data["review_content"].astype('str').values)
-    embeddings = torch.stack(data["embedding"].values.tolist()).numpy()
 
     # Execute the topic modeling
     topic_model = BERTopic(language="english")
-    topics, probs = topic_model.fit_transform(docs, embeddings)
+    if common_embedding:
+        # If we use common embeddings for all code parts, extract them
+        embeddings = torch.stack(data["embedding"].values.tolist()).numpy()
+        topics, probs = topic_model.fit_transform(docs, embeddings)
+    else:
+        # Otherwise, BERTopic will generate embeddings itself (using all-MiniLM-L6-v2)
+        topics, probs = topic_model.fit_transform(docs)
     topics = np.array(topics)
 
     # Print topic results. The -1 topic refers to all outlier documents and is typically ignored
@@ -28,4 +33,4 @@ def model_topics(data: pd.DataFrame, print_topics: bool = True):
             print()
         print()
 
-    return pd.DataFrame({"review_content": docs, "topic": topics})
+    data['topic'] = topics

@@ -9,5 +9,9 @@ class SentenceEncoder:
         self.model = DistilBertModel.from_pretrained('distilbert-base-uncased')
 
     def encode_sentences(self, data: torch.Tensor):
-        encoded = self.tokenizer(data)
-        return self.model(encoded)
+        encoded = self.tokenizer(data, return_tensors='pt', padding=True, truncation=True)
+        model_output = self.model(**encoded)
+        last_model_layer = model_output[0]
+        # cls token pooling
+        pooled_model_output = last_model_layer[:, 0]
+        return pooled_model_output

@@ -25,16 +25,24 @@ def detect_similarity_crossencoder(data: pd.DataFrame):
 
 
 class BiEncoderSimilarity:
-    def __init__(self):
-        self.model = SentenceTransformer('stsb-roberta-large')
+    def __init__(self, common_embedding: bool = False):
+        if common_embedding:
+            # We don't need a model if the embeddings are provided
+            self.model = None
+        else:
+            self.model = SentenceTransformer('stsb-roberta-large')
         self.data = None
         self.embeddings = None
         self.tree = None
+        self.common_embedding = common_embedding
 
     def set_data(self, data: pd.DataFrame):
         self.data = data
-        # Encode given movie reviews
-        self.embeddings = torch.stack(data['embedding'].values.tolist())
+        if self.common_embedding:
+            self.embeddings = torch.stack(data['embedding'].values.tolist())
+        else:
+            # Encode given movie reviews
+            self.embeddings = self.model.encode(data["review_content"].values.tolist(), convert_to_tensor=True)
 
         # A K-D tree can be used for efficient nearest neighbor queries
         # If we normalize the embeddings, k-d trees are equivalent to cosine similarity
