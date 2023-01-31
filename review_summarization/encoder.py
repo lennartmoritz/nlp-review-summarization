@@ -1,10 +1,11 @@
-import pandas as pd
 import torch
-from transformers import DistilBertModel, DistilBertTokenizer
+from transformers import DistilBertModel, DistilBertTokenizer, logging
 
 
 class SentenceEncoder:
     def __init__(self):
+        # Suppress fine-tuning warning
+        logging.set_verbosity_error()
         self.tokenizer = DistilBertTokenizer.from_pretrained('distilbert-base-uncased')
         self.model = DistilBertModel.from_pretrained('distilbert-base-uncased')
 

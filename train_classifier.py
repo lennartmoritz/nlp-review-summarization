@@ -6,10 +6,12 @@ from transformers import DistilBertForSequenceClassification, DistilBertConfig, 
 from datasets import load_dataset
 
 from review_summarization.dataset_loading import load_roto_dataset, load_score_dataset
+from review_summarization.encoder import SentenceEncoder
 from review_summarization.sentiment_classification import classify_sentiment, AVAILABLE_MODELS
 
 
 def train_model():
+    """Train the classification head for the sentiment analysis task"""
     config = DistilBertConfig.from_pretrained('distilbert-base-uncased-finetuned-sst-2-english')
     model = DistilBertForSequenceClassification(config)
     model.distilbert.from_pretrained('distilbert-base-uncased')
@@ -44,11 +46,19 @@ def train_model():
     print(eval_results)
 
 
-def evaluate_on_labelled_data():
+def evaluate_on_labelled_data(common_embedding=False):
+    """This function evaluates a sentiment classifier on the aggregated data of Rotten Tomatoes"""
     data = load_roto_dataset()[:1000]
     score_dataset = load_score_dataset()
-    classify_sentiment(data, AVAILABLE_MODELS[0])
     concat_data = pd.concat([data, score_dataset], axis=1, join='inner')
+
+    if common_embedding:
+        encoder = SentenceEncoder()
+        sentence_data = encoder.encode_sentences(data["review_content"].values.tolist())
+        concat_data["embedding"] = list(sentence_data.detach())
+
+    classify_sentiment(concat_data, AVAILABLE_MODELS[0], common_embedding=common_embedding)
+
     accuracy = np.sum(concat_data.sentiment_label == concat_data.normalised_pone) / len(concat_data)
     print('Accuracy:', accuracy)
     true_positives = np.sum((concat_data.sentiment_label == 'POSITIVE') & (concat_data.normalised_pone == 'POSITIVE'))
@@ -59,5 +69,5 @@ def evaluate_on_labelled_data():
 
 
 if __name__ == '__main__':
-    #train_model()
-    evaluate_on_labelled_data()
+    train_model()
+    #evaluate_on_labelled_data()
