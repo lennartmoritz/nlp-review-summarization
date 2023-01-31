@@ -3,6 +3,7 @@ import os
 import pandas as pd
 
 DATASET_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'data.csv')
+NORMALISED_DATASET_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'data_normalised.csv')
 
 
 def load_dataset():
@@ -31,6 +32,12 @@ def load_imdb_dataset():
     """
     data = load_dataset()
     return data[data['dataset_id'] == "imdb"]
+
+
+def load_score_dataset():
+    data = pd.read_csv(NORMALISED_DATASET_PATH)
+    data = data.set_index('ID')
+    return data
 
 
 def print_dataset_information(data):

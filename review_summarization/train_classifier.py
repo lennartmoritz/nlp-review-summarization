@@ -1,7 +1,12 @@
+import numpy as np
+import pandas as pd
 import torch
 from transformers import DistilBertForSequenceClassification, DistilBertConfig, TrainingArguments, Trainer, DistilBertTokenizer, \
     DataCollator, DataCollatorWithPadding
 from datasets import load_dataset
+
+from review_summarization.dataset_loading import load_roto_dataset, load_score_dataset
+from review_summarization.sentiment_classification import classify_sentiment, AVAILABLE_MODELS
 
 
 def train_model():
@@ -39,5 +44,20 @@ def train_model():
     print(eval_results)
 
 
+def evaluate_on_labelled_data():
+    data = load_roto_dataset()[:1000]
+    score_dataset = load_score_dataset()
+    classify_sentiment(data, AVAILABLE_MODELS[0])
+    concat_data = pd.concat([data, score_dataset], axis=1, join='inner')
+    accuracy = np.sum(concat_data.sentiment_label == concat_data.normalised_pone) / len(concat_data)
+    print('Accuracy:', accuracy)
+    true_positives = np.sum((concat_data.sentiment_label == 'POSITIVE') & (concat_data.normalised_pone == 'POSITIVE'))
+    precision = true_positives / np.sum(concat_data.sentiment_label == 'POSITIVE')
+    recall = true_positives / np.sum(concat_data.normalised_pone == 'POSITIVE')
+    print('Precision:', precision)
+    print('Recall:', recall)
+
+
 if __name__ == '__main__':
-    train_model()
+    #train_model()
+    evaluate_on_labelled_data()
